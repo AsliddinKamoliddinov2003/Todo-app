@@ -1,82 +1,54 @@
-from django import forms
-from main.forms import CreatePostForm
 from .models import *
 from django.shortcuts import redirect, render
 from django.urls import reverse
 
 
+
 def index(request):
-    data = Information.objects.all()
+    if request.method=='POST':
+        work=request.POST['work']
+        new=Information(description=work)
+        new.save()
 
+    news=Information.objects.all()
     context = {
-        "data": data
+        "news":news
     }
-
-    return render(request, "index.html", context)
-
+    return render(request, "todo.html", context)
 
 
-def post_detail(request, pk):
-    new = Information.objects.filter(id=pk)
+def finishtodo(request,pk):
+    Information.objects.filter(id=pk).update(status='True')
 
-    if not new.exclude():
-        return redirect(reverse("index"))
-    else:
-        new = new.first()
-
-    context = {
-        "new":new
-    }
-
-    return render(request, "post_detail.html", context)
+    return redirect(reverse("index"))
 
 
-def create_post(request):
-    form = CreatePostForm
-
-    if request.method == "POST":
-        form  =  CreatePostForm(request.POST)
-        if form.is_valid():
-            form.save()
-            return redirect(reverse("index"))
-
-    context = {
-        "form":form
-    }
-
-    return render(request, "create_post.html", context)
+def davometish(request, pk):
+    Information.objects.filter(id=pk).update(status='False')
+    return redirect(reverse("index"))
 
 
-def update_post(request, pk):
-    new = Information.objects.filter(id=pk)
-    
-    if not new.exclude():
-        return redirect(reverse("index"))
-    else:
-        new = new.first()
-
-    form = CreatePostForm(instance=new)
-
-    if request.method == "POST":
-        new = CreatePostForm(request.POST, instance=new)
-        if new.is_valid():
-            new.save()
-            return redirect(reverse("index"))
-
-    context = {
-        "form":form
-    }
-
-    return render(request, "update_post.html", context)
-
-
-def delete_post(request, pk):
+def delete(request, pk):
     try:
-        new = Information.objects.filter(id=pk)
-        new.delete()
-    except Information.DoesNotExist:
+        work = Information.objects.get(id=pk)
+        work.delete()
+    except Information.DoesNotExist():
         pass
 
     return redirect(reverse("index"))
-    
+
+
+def update(request, pk):
+    if request.method=='POST':
+        work=request.POST['work']
+        Information.objects.filter(id=pk).update(description=work)
+        return redirect(reverse("index"))
+
+    work=Information.objects.get(id=pk)
+    context = {
+        "work":work
+    }
+    return render(request,'update.html', context)
+
+
 
