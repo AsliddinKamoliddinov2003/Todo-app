@@ -19,7 +19,6 @@ def index(request):
 
 def finishtodo(request,pk):
     Information.objects.filter(id=pk).update(status='True')
-
     return redirect(reverse("index"))
 
 
@@ -49,6 +48,7 @@ def update(request, pk):
         "work":work
     }
     return render(request,'update.html', context)
+
 
 
 
